@@ -1,22 +1,50 @@
-FROM node:22-alpine AS build
+FROM ubuntu:24.04
 
-WORKDIR /app
+# Nama user SSH di dalam container
+ARG SSH_USER=ramalana_k
 
-COPY package.json package-lock.json ./
+# Install OpenSSH Server
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends openssh-server && \
+    rm -rf /var/lib/apt/lists/* && \
+    mkdir -p /run/sshd && \
+    useradd --create-home --shell /bin/bash "$SSH_USER"
 
-RUN npm ci
+# Salin public key
+COPY ramalana_docker_key.pub /tmp/user_key.pub
 
-COPY . .
-RUN npm run build
+# public key authorized_keys user
+RUN install -d -m 700 -o "$SSH_USER" -g "$SSH_USER" "/home/$SSH_USER/.ssh" && \
+    install -m 600 -o "$SSH_USER" -g "$SSH_USER" \
+    /tmp/user_key.pub "/home/$SSH_USER/.ssh/authorized_keys" && \
+    rm /tmp/user_key.pub
 
-FROM nginx:alpine
+# Mengubah konfigurasi SSH perintah sed
+RUN sed -Ei \
+    's/^[#[:space:]]*PermitRootLogin[[:space:]]+.*/PermitRootLogin no/' \
+    /etc/ssh/sshd_config && \
+    sed -Ei \
+    's/^[#[:space:]]*PasswordAuthentication[[:space:]]+.*/PasswordAuthentication no/' \
+    /etc/ssh/sshd_config && \
+    sed -Ei \
+    's/^[#[:space:]]*KbdInteractiveAuthentication[[:space:]]+.*/KbdInteractiveAuthentication no/' \
+    /etc/ssh/sshd_config && \
+    sed -Ei \
+    's/^[#[:space:]]*PubkeyAuthentication[[:space:]]+.*/PubkeyAuthentication yes/' \
+    /etc/ssh/sshd_config
 
-RUN rm /etc/nginx/conf.d/default.conf
+# konfigurasi keamanan aktif dan tidak ditimpa
+RUN printf '%s\n' \
+    'PermitRootLogin no' \
+    'PasswordAuthentication no' \
+    'KbdInteractiveAuthentication no' \
+    'PubkeyAuthentication yes' \
+    'PermitEmptyPasswords no' \
+    'AuthenticationMethods publickey' \
+    > /etc/ssh/sshd_config.d/00-key-only.conf
 
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Port SSH
+EXPOSE 22
 
-COPY --from=build /app/dist /usr/share/nginx/html
-
-EXPOSE 80
-
-CMD ["nginx", "-g", "daemon off;"]
+# run SSH Server
+CMD ["/usr/sbin/sshd", "-D", "-e"]
