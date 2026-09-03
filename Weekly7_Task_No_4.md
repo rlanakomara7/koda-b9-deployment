@@ -1,11 +1,15 @@
-Konsep Dasar Linux, SSH, HTTP/HTTPS, dan Docker
-Rangkuman beserta contoh
+**Konsep Dasar Linux, SSH, HTTP/HTTPS, dan Docker
+Rangkuman beserta contoh**
 
+```sh
 A. Linux Kernel vs Distro
 Kernel adalah inti sistem operasi Linux yang mengatur hardware, memori, dan proses. Kernel sendiri tidak bisa dipakai langsung oleh pengguna biasa.
 Distro adalah paket lengkap yang dibangun di atas kernel, ditambah package manager, shell, dan aplikasi, sehingga siap dipakai.
 Contoh: Ubuntu, Debian, dan Fedora sama-sama memakai Linux Kernel, tapi beda package manager dan tampilan.
+```
 
+
+```sh
 B. Linux FHS
 FHS (Filesystem Hierarchy Standard) mengatur letak folder di Linux agar konsisten di semua distro.
 -	/etc — file konfigurasi, contoh: /etc/ssh/sshd_config
@@ -15,6 +19,9 @@ FHS (Filesystem Hierarchy Standard) mengatur letak folder di Linux agar konsiste
 -	/tmp — file sementara
 Contoh: saat mau cek log server, admin langsung buka /var/log tanpa perlu menebak-nebak lokasinya.
 
+```
+
+```sh
 C. Permission dan Owner
 Tiap file punya owner (user), group, dan others. Masing-masing bisa diberi izin read (r), write (w), dan execute (x).
 
@@ -27,6 +34,10 @@ chown andi:developer deploy.sh
 
 chmod mengubah hak akses, chown mengubah kepemilikan file.
 
+```
+
+
+```sh
 D. Bash, sh, dan Shell Lain
 Shell adalah program untuk menjalankan perintah di terminal.
 -	sh — shell paling dasar, ringan tapi fiturnya minim
@@ -35,6 +46,9 @@ Shell adalah program untuk menjalankan perintah di terminal.
 -	fish — lebih ramah pemula, ada saran perintah otomatis
 Contoh: baris pertama script seperti #!/bin/bash menentukan shell apa yang dipakai untuk menjalankan script itu.
 
+```
+
+```sh
 E. Enkripsi pada SSH
 SSH dipakai untuk remote ke server dengan aman. Ada 3 mekanisme yang berperan:
 -	Enkripsi asimetris — dipakai di awal untuk key exchange dan autentikasi (kunci publik & privat)
@@ -42,21 +56,34 @@ SSH dipakai untuk remote ke server dengan aman. Ada 3 mekanisme yang berperan:
 -	Hashing (HMAC) — memastikan data yang dikirim tidak diubah di tengah jalan
 Contoh: ssh-keygen membuat pasangan kunci, lalu kunci publik dikirim ke server supaya bisa login tanpa password tapi tetap aman.
 
+```
+
+```sh
 F. HTTP vs HTTPS
 HTTP mengirim data tanpa enkripsi (plain text), jadi bisa disadap. Pakai port 80.
 HTTPS menambahkan enkripsi TLS/SSL sehingga data aman meski disadap. Pakai port 443 dan butuh sertifikat SSL.
 Contoh: situs bank wajib pakai HTTPS supaya data login nasabah tidak bisa dibaca orang lain.
 
+```
+
+
+```sh
 G. Docker OCI Compliance
 OCI (Open Container Initiative) adalah standar terbuka untuk format image dan cara container dijalankan, supaya tidak tergantung satu vendor saja.
 Docker sudah mengikuti standar OCI, jadi image yang dibuat pakai Docker bisa dijalankan di runtime lain seperti containerd atau Podman.
 Contoh: image dibuat dengan docker build, lalu dijalankan di Kubernetes yang pakai containerd — tetap jalan karena sama-sama ikut standar OCI.
 
+```
+
+
+```sh
 H. Container vs VM
 VM menjalankan sistem operasi penuh sendiri-sendiri lewat hypervisor. Ukurannya besar dan booting-nya lambat.
 Container berbagi kernel yang sama dengan host, jadi lebih ringan dan cepat nyala (hitungan detik).
 Contoh: kalau butuh beberapa OS berbeda (Windows dan Linux), pakai VM. Kalau cuma butuh banyak instance aplikasi Linux, container lebih hemat resource.
+```
 
+```sh
 I. Image Layer pada Docker
 Docker image tersusun dari beberapa layer yang bertumpuk. Setiap baris di Dockerfile biasanya jadi satu layer baru.
 
@@ -67,6 +94,10 @@ COPY . .
 
 Manfaatnya: layer yang sama bisa dipakai bareng antar image (hemat storage), dan layer yang tidak berubah bisa dipakai dari cache supaya build lebih cepat.
 
+```
+
+
+```sh
 J. Docker Volume dan Network
 Volume
 Data di dalam container biasanya hilang kalau container dihapus. Volume dipakai supaya data tetap tersimpan meski container-nya diganti.
@@ -83,6 +114,10 @@ docker run -d --name db --network app-network mysql:8
 
 Contoh: container backend bisa langsung konek ke database cukup pakai nama 'db', tanpa perlu tahu IP-nya.
 
+```
+
+
+```sh
 K. Web Server dan Reverse Proxy
 Web server menerima request dari browser dan mengirim balik halaman web. Contoh: Nginx, Apache.
 Reverse proxy adalah server perantara yang meneruskan request ke server backend yang sesuai, tanpa klien tahu server aslinya.
@@ -95,5 +130,7 @@ location /api/ {
 }
 
 Contoh: request ke /api/ diarahkan ke server backend, request lain diarahkan ke frontend — semua lewat satu domain.
+
+```
 
 
